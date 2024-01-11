@@ -1,0 +1,2309 @@
+<section class="absolute inset-0 flex flex-col min-w-0 overflow-hidden">
+    <!-- <i class="iconsvg icon-mushroom_adobe_express"></i> -->
+    <mat-drawer-container class="flex-auto h-full bg-card dark:bg-transparent">
+        <mat-drawer
+            class="w-full sm:w-128 dark:bg-gray-900"
+            [mode]="drawerMode"
+            [opened]="isMatDrawerOpened"
+            [position]="'end'"
+            [disableClose]="true"
+            #matDrawer
+            ><div>
+                <ng-container *ngIf="isAdhocItemDetails">
+                    <div class="flex flex-auto">
+                        <form
+                            class="flex flex-col flex-auto p-6 pt-10 sm:p-8 sm:pt-10 overflow-y-auto"
+                            [formGroup]="adhocItemformGroup"
+                        >
+                            <!-- Header -->
+                            <div class="flex justify-between -mt-3 -ml-4">
+                                <div class="flex items-center">
+                                    <a mat-icon-button (click)="OnCloseItem()">
+                                        <mat-icon
+                                            [svgIcon]="'heroicons_outline:x'"
+                                        ></mat-icon>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <mat-divider class="mt-6 mb-8"></mat-divider>
+                            <div
+                                class="w-20 border-4 border-indigo-600 mb-4"
+                                *ngIf="currentObj?.prodImage"
+                            >
+                                <img
+                                    [src]="
+                                        ingredientsImagePath +
+                                        currentObj.prodImage
+                                    "
+                                    onerror="this.style.display='none'"
+                                    class="w-20"
+                                />
+                            </div>
+
+                            <div
+                                class="flex flex-row justify-between"
+                                *ngIf="adhocpoitemid != 0"
+                            >
+                                <button
+                                    class="btn btn-primary"
+                                    (click)="OnAddToStock()"
+                                    *ngIf="!currentObj?.isStockAdded"
+                                >
+                                    Add to Stock
+                                </button>
+                                <button
+                                    class="btn btn-secondary"
+                                    (click)="OpenPriceModal(updatePrice)"
+                                >
+                                    Update Price
+                                </button>
+                            </div>
+                            <mat-divider class="mt-6 mb-8"></mat-divider>
+                            <!-- Title -->
+                            <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Purchase Order:</label
+                                >
+                                <select
+                                    class="form-control"
+                                    formControlName="adhocpoid"
+                                >
+                                    <option value="">--Select--</option>
+                                    <option
+                                        *ngFor="let adhoc of adhocPoData"
+                                        [value]="adhoc.adhocpoid"
+                                    >
+                                        {{ adhoc.adhocpoid }}-{{
+                                            adhoc.description
+                                        }}
+                                    </option>
+                                </select>
+
+                                <!-- <div *ngIf="validation">
+                                      <mat-error *ngIf="TableFieldsForm.controls['supItemId'].hasError('required')">
+                                        <strong >required</strong>
+                                      </mat-error>
+                                    </div> -->
+                            </div>
+                            <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Category:</label
+                                >
+                                <select
+                                    class="form-control"
+                                    formControlName="category"
+                                >
+                                    <option value="">--Select--</option>
+                                    <option
+                                        *ngFor="let all of categories"
+                                        [value]="all"
+                                    >
+                                        {{ all }}
+                                    </option>
+                                </select>
+                                <!-- <div *ngIf="validation">
+                                    <mat-error *ngIf="TableFieldsForm.controls['productId'].hasError('required')">
+                                      <strong >required</strong>
+                                    </mat-error>
+                                  </div> -->
+                            </div>
+                            <!-- <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Suppliers:</label
+                                >
+                                <select
+                                    class="form-control"
+                                    formControlName="supplierId"
+                                    (change)="
+                                        OnSelectSupplier($event.target.value)
+                                    "
+                                >
+                                    <option value="">--Select--</option>
+                                    <option
+                                        *ngFor="let all of suppliersList"
+                                        [value]="all.supId"
+                                    >
+                                        {{ all.supId }}-{{ all.name }}
+                                    </option>
+                                </select>
+
+                            </div> -->
+
+                            <div class="form-group">
+                                <!-- <label for="validationCustom01" class="mb-1">Product List:</label>
+                                <select class="form-control" required="" formControlName="productlist">
+                                  <option value="">--Select--</option>
+                                  <option *ngFor="let all of Productslist" [value]="all.prodId">{{all.prodId}}-{{all.prodName}}</option>
+                              </select> -->
+                                <mat-form-field style="width: 100% !important">
+                                    <mat-label>Products</mat-label>
+                                    <mat-select
+                                        formControlName="productlist"
+                                        #singleSelect
+                                        class="form-control-plain-text"
+                                        (selectionChange)="
+                                            onSelectProducts(
+                                                $event.source.value
+                                            )
+                                        "
+                                        aria-readonly="true"
+                                    >
+                                        <mat-option>
+                                            <ngx-mat-select-search
+                                                [formControl]="itemControl"
+                                                placeholderLabel="Search"
+                                            ></ngx-mat-select-search>
+                                        </mat-option>
+
+                                        <mat-option
+                                            *ngFor="let all of filtereditems"
+                                            [value]="all.productId"
+                                        >
+                                            {{ all.productId }}-{{
+                                                all.productname
+                                            }}-{{all.supname}}-PP:{{all.purchasePrice}}-SP:{{all.salePrice}}-M:{{all.margin}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <!-- <div *ngIf="validation">
+                                  <mat-error *ngIf="TableFieldsForm.controls['prodname'].hasError('required')">
+                                    <strong >required</strong>
+                                  </mat-error>
+                                </div> -->
+                            </div>
+                            <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Quantity:</label
+                                >
+                                <input
+                                    class="form-control"
+                                    required
+                                    (input)="
+                                        OnQuantityEnter(
+                                            $event.target.valueAsNumber
+                                        )
+                                    "
+                                    type="number"
+                                    formControlName="quantity"
+                                    aria-readonly="true"
+                                />
+                                <!-- <div *ngIf="validation">
+                                <mat-error *ngIf="TableFieldsForm.controls['prodname'].hasError('required')">
+                                  <strong >required</strong>
+                                </mat-error>
+                              </div> -->
+                            </div>
+                            <div class="form-group">
+                                <label for="" class="mb-1"
+                                    >Purchased Quantity:</label
+                                >
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    formControlName="purchasedquantity"
+                                />
+                            </div>
+                            <!-- <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >UOM:</label
+                                >
+                                <select
+                                    class="form-control"
+                                    formControlName="uom"
+                                >
+                                    <option value="">--Select--</option>
+                                    <option
+                                        *ngFor="let all of uomData"
+                                        [value]="all"
+                                    >
+                                        {{ all }}
+                                    </option>
+                                </select>
+                            </div> -->
+                            <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Price per UOM :</label
+                                >
+                                <input
+                                    class="form-control"
+                                    type="number"
+                                    (input)="
+                                        OnPricePerUOMChange(
+                                            $event.target.valueAsNumber
+                                        )
+                                    "
+                                    aria-readonly="true"
+                                    disabled="true"
+                                    formControlName="price"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Purchased Price :</label
+                                >
+                                <input
+                                    class="form-control"
+                                    type="number"
+                                    (input)="
+                                        OnFinalPriceChange(
+                                            $event.target.valueAsNumber
+                                        )
+                                    "
+                                    formControlName="finalprice"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Tax Amount:</label
+                                >
+                                <input
+                                    class="form-control"
+                                    type="number"
+                                    
+                                    formControlName="taxAmount"
+                                />
+                                </div>
+                            <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Last Purchased Date :</label
+                                >
+                                <input
+                                    class="form-control"
+                                    type="date"
+                                    readonly
+                                    formControlName="lastpddate"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Last Purchased Place :</label
+                                >
+                                <input
+                                    class="form-control"
+                                    type="text"
+                                    readonly
+                                    formControlName="lastpdfrom"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Last Purchased Price :</label
+                                >
+                                <input
+                                    class="form-control"
+                                    type="number"
+                                    readonly
+                                    formControlName="lastpdprice"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Available:</label
+                                >
+                                <input
+                                    type="checkbox"
+                                    class="form-check"
+                                    formControlName="available"
+                                />
+                                <!-- <div *ngIf="validation">
+                            <mat-error *ngIf="TableFieldsForm.controls['prodname'].hasError('required')">
+                              <strong >required</strong>
+                            </mat-error>
+                          </div> -->
+                            </div>
+
+                            <mat-divider class="mt-6 mb-8"></mat-divider>
+                            <div
+                                class="d-flex flex-row justify-content-between"
+                            >
+                                <button
+                                    class="btn btn-danger"
+                                    (click)="OnDel(deleteDialog)"
+                                >
+                                    Delete
+                                </button>
+                                <button
+                                    class="btn btn-primary"
+                                    (click)="OnSaveItem()"
+                                >
+                                    Save
+                                </button>
+                            </div>
+
+                            <!-- <div class="form-group">
+                                <label>Add Comments</label>
+                                <textarea
+                                    rows="5"
+                                    [formControl]="comment"
+                                    class="form-control"
+                                ></textarea>
+                            </div> -->
+                            <!-- Tags -->
+                        </form>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="isAdhocDetails">
+                    <div class="flex flex-auto">
+                        <form
+                            class="flex flex-col flex-auto p-6 pt-10 sm:p-8 sm:pt-10 overflow-y-auto"
+                            [formGroup]="adhocPoFormGroup"
+                        >
+                            <div class="flex justify-between -mt-3 -ml-4">
+                                <div class="flex items-center">
+                                    <a mat-icon-button (click)="OnCloseItem()">
+                                        <mat-icon
+                                            [svgIcon]="'heroicons_outline:x'"
+                                        ></mat-icon>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <mat-divider class="mt-6 mb-8"></mat-divider>
+                            <div class="flex justify-between">
+                                <button
+                                    mat-mini-fab
+                                    color="primary"
+                                    (click)="OnAdhocItemClick()"
+                                >
+                                    <mat-icon>add</mat-icon>
+                                </button>
+                                <button
+                                    mat-mini-fab
+                                    color="accent"
+                                    (click)="OnExport(content)"
+                                >
+                                    <mat-icon>cloud_download</mat-icon>
+                                </button>
+                                <button
+                                    mat-mini-fab
+                                    color="basic"
+                                    (click)="OnExportByQuantity(content)"
+                                >
+                                    <mat-icon color="primary"
+                                        >cloud_download</mat-icon
+                                    >
+                                </button>
+                            </div>
+                            <mat-divider class="mt-6 mb-8"></mat-divider>
+
+                            <!-- <div class="form-group">
+                                <label for="" class="mb-1">Vendor Id</label>
+                                <select
+                                    name=""
+                                    id=""
+                                    class="form-control"
+                                    formControlName="vendorId"
+                                >
+                                    <option value="">--Select--</option>
+                                    <option
+                                        *ngFor="let obj of vendorData"
+                                        [value]="obj.vendorId"
+                                    >
+                                        {{ obj.vendorName }}
+                                    </option>
+                                </select>
+                            </div> -->
+                            <div class="form-group">
+                                <label for="" class="mb-1">Date</label>
+                                <input
+                                    type="date"
+                                    class="form-control"
+                                    formControlName="date"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="" class="mb-1">Description</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    formControlName="description"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="" class="mb-1">Category:</label>
+                                <select
+                                    class="form-control"
+                                    formControlName="category"
+                                >
+                                    <option value="">--Select--</option>
+                                    <option
+                                        *ngFor="let all of categories"
+                                        [value]="all"
+                                    >
+                                        {{ all }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Counter :</label
+                                >
+                                <select
+                                    class="form-control"
+                                    formControlName="stallId"
+                                >
+                                    <option value="">--Select--</option>
+                                    <option
+                                        *ngFor="let all of stallData"
+                                        [value]="all.stallid"
+                                    >
+                                        {{ all.name }}
+                                    </option>
+                                </select>
+                                </div>
+                            <div class="form-group">
+                                <label for="" class="mb-1">Purchased By</label>
+                                <select
+                                    name=""
+                                    id=""
+                                    class="form-control"
+                                    formControlName="purchasedby"
+                                >
+                                    <option value="">--Select--</option>
+                                    <option
+                                        *ngFor="let op of stallOperator"
+                                        [value]="op.stalloperatorid"
+                                    >
+                                        {{ op.stalloperatorid }}-{{ op.name }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="mb-1">Purchased At</label>
+                                <select class="form-control" formControlName="purchasedat">
+                                    <option value="">--Select--</option>
+                                    <option
+                                    *ngFor="let supp of suppliersList"
+                                        [value]="supp.supId"
+
+                                    >
+                                        {{ supp.supId }} - {{supp.name}}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Status :</label
+                                >
+                                <select
+                                    class="form-control"
+                                    formControlName="status"
+                                >
+                                    <option value="">--Select--</option>
+                                    <option
+                                        *ngFor="let stat of statusData"
+                                        [value]="stat"
+                                    >
+                                        {{ stat }}
+                                    </option>
+                                </select>
+                                <!-- <div *ngIf="validation">
+                              <mat-error *ngIf="TableFieldsForm.controls['prodname'].hasError('required')">
+                                <strong >required</strong>
+                              </mat-error>
+                            </div> -->
+                            </div>
+                            <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Total Amount:</label
+                                >
+                                <input
+                                    class="form-control"
+                                    type="number"
+                                    readonly
+                                    formControlName="totalamount"
+                                />
+                                <!-- <div *ngIf="validation">
+                                <mat-error *ngIf="TablefieldsForm.controls['prodname'].hasError('required')">
+                                  <strong >required</strong>
+                                </mat-error>
+                              </div> -->
+                            </div>
+                            <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Tax Amount:</label
+                                >
+                                <input
+                                    class="form-control"
+                                    type="number"
+                                    
+                                    formControlName="taxAmount"
+                                />
+                                </div>
+                            <div class="form-group">
+                                <label for="" class="mb-1">Paid Amount</label>
+                                <input
+                                    type="number"
+                                    (input)="
+                                        OnPaidAmountEnter(
+                                            $event.target.valueAsNumber
+                                        )
+                                    "
+                                    class="form-control"
+                                    formControlName="paidamount"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="" class="mb-1">Balance</label>
+                                <input
+                                    type="number"
+                                    readonly
+                                    class="form-control"
+                                    formControlName="balance"
+                                />
+                            </div>
+                            <div class="form-group">
+                                <label for="validationCustom01" class="mb-1"
+                                    >Total Items:</label
+                                >
+                                <input
+                                    class="form-control"
+                                    type="number"
+                                    readonly
+                                    formControlName="totalitems"
+                                />
+                                <!-- <div *ngIf="validation">
+                              <mat-error *ngIf="TableFieldsForm.controls['prodname'].hasError('required')">
+                                <strong >required</strong>
+                              </mat-error>
+                            </div> -->
+                            </div>
+
+                            <!-- <div
+                                class="form-group flex flex-row gap-2 mt-1 mb-1"
+                            >
+                                <label for="" class="mb-1">Payment: </label>
+                                <mat-radio-group
+                                    aria-label="Select an option"
+                                    formControlName="paymentstatus"
+                                >
+                                    <mat-radio-button value="Paid"
+                                        >Paid</mat-radio-button
+                                    >
+                                    <mat-radio-button value="Not Paid"
+                                        >Not Paid
+                                    </mat-radio-button>
+                                </mat-radio-group>
+                            </div> -->
+
+                            <mat-divider class="mt-6 mb-8"></mat-divider>
+                            <div
+                                class="d-flex flex-row justify-content-between"
+                            >
+                                <button
+                                    class="btn btn-danger"
+                                    (click)="OnDelAdhoc(deleteDialogAdhoc)"
+                                >
+                                    Delete
+                                </button>
+                                <button
+                                    class="btn btn-primary"
+                                    (click)="OnSaveAdhoc()"
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </ng-container>
+            </div>
+        </mat-drawer>
+
+        <mat-drawer-content class="flex flex-col">
+            <div class="flex flex-col flex-auto">
+                <!-- Header -->
+                <div class="flex flex-row py-8 px-6 md:px-8">
+                    <!-- Title -->
+                    <div>
+                        <div
+                            class="text-4xl font-extrabold tracking-tight leading-none"
+                        >
+                            Refill Orders
+                        </div>
+                    </div>
+
+                    <div class="div header-btns">
+                        <button
+                            class="ml-3"
+                            mat-flat-button
+                            [color]="'primary'"
+                            (click)="OnAdhocClick()"
+                        >
+                            <!-- <mat-icon
+                            [svgIcon]="'heroicons_outline:plus'"
+                        ></mat-icon> -->
+                            <!-- <mat-icon></mat-icon> -->
+
+                            <span class="ml-2 mr-1">Add PO</span>
+                        </button>
+                    </div>
+                    <div class="div">
+                        <button
+                            class="ml-3"
+                            mat-flat-button
+                            [color]="'secondary'"
+                            (click)="OpenMergePop(mergePopup)"
+                        >
+                            Merge PO
+                        </button>
+                    </div>
+                    <div class="export"></div>
+                </div>
+                <form
+                    [formGroup]="searchFormGroup"
+                    class="flex lg:flex-row sm:flex-col lg:justify-center sm:align-items-center mainForm"
+                >
+                    <!-- <div class="dates"> -->
+
+                    <div class="form-row flex searchform" style="gap: 5px">
+                        <div style="width: min-content">
+                            <mat-form-field
+                                appearance="fill"
+                                style="width: 100% !important"
+                            >
+                                <mat-label>Enter a date range</mat-label>
+                                <mat-date-range-input [rangePicker]="picker">
+                                    <input
+                                        matStartDate
+                                        placeholder="Start date"
+                                        formControlName="startDate"
+                                    />
+                                    <input
+                                        matEndDate
+                                        placeholder="End date"
+                                        formControlName="endDate"
+                                    />
+                                </mat-date-range-input>
+                                <mat-datepicker-toggle
+                                    matSuffix
+                                    [for]="picker"
+                                ></mat-datepicker-toggle>
+                                <mat-date-range-picker
+                                    #picker
+                                ></mat-date-range-picker>
+                            </mat-form-field>
+                        </div>
+
+                        <div>
+                            <mat-form-field appearance="fill">
+                                <mat-label>Status</mat-label>
+                                <mat-select formControlName="status">
+                                    <mat-option value="">All</mat-option>
+                                    <mat-option
+                                        *ngFor="let all of statusData"
+                                        [value]="all"
+                                        >{{ all }}</mat-option
+                                    >
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        <div>
+                            <mat-radio-group
+                                aria-label="Select an option"
+                                formControlName="paymentStatus"
+                            >
+                                <mat-radio-button value="Paid"
+                                    >Paid</mat-radio-button
+                                >
+                                <mat-radio-button value="Not Paid"
+                                    >Not Paid
+                                </mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+                        <div class="flex">
+                            <div style="align-self: center">
+                                <button
+                                    class="btn btn-primary mb-2"
+                                    (click)="onSearch()"
+                                >
+                                    Go
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <div class="divide-y">
+                    <ng-container>
+                        <div *ngFor="let po of adhocPoData; let i = index">
+                            <div
+                                class="d-flex flex-row items-center pl-3 w-100 h12 p-3 adhoc-po"
+                                (click)="activatingChild(po, lastDivRef)"
+                                #lastDivRef
+                            >
+                                <div class="d-flex flex-column w-50 adhoc">
+                                    <div
+                                        class="text-lg font-semibold text-primary description"
+                                        (click)="OnEditAdhocPo(po, $event)"
+                                    >
+                                        <a class="cursor-pointer">
+                                            {{ po.adhocpoid }}-{{
+                                                po?.description
+                                            }}</a
+                                        >
+                                    </div>
+                                    <div
+                                        class="text-lg font-semibold text-primary adhoc"
+                                    >
+                                        Category : {{ po?.category }}
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-column w-50 adhoc">
+                                    <div
+                                        class="text-lg font-semibold text-primary"
+                                    >
+                                        Amount: {{ po.availablePrice }}/{{
+                                            po.totalamount
+                                        }}
+                                    </div>
+                                    <div
+                                        class="h-8 text-lg font-semibold text-primary adhoc"
+                                    >
+                                        Items: {{ po?.totalitems }} Bal:
+                                        {{ po?.balance }}
+                                    </div>
+                                </div>
+                                <!-- <button (click)="OnPdfPress(po)">PDF</button> -->
+                                <div class="d-flex flex-column w-50 adhoc">
+                                    <div
+                                        class="text-lg font-semibold text-primary"
+                                    >
+                                        <button>
+                                            {{ po.status }}
+                                        </button>
+                                        <mat-menu #statusMenu="matMenu">
+                                            <button
+                                                mat-menu-item
+                                                (click)="
+                                                    StatusChange(po, 'Open')
+                                                "
+                                            >
+                                                Open
+                                            </button>
+                                            <button
+                                                mat-menu-item
+                                                (click)="
+                                                    StatusChange(
+                                                        po,
+                                                        'In Progress'
+                                                    )
+                                                "
+                                            >
+                                                In Progress
+                                            </button>
+                                            <button
+                                                mat-menu-item
+                                                (click)="
+                                                    StatusChange(
+                                                        po,
+                                                        'Completed'
+                                                    )
+                                                "
+                                            >
+                                                Completed
+                                            </button>
+                                        </mat-menu>
+                                    </div>
+                                    <div
+                                        class="h-8 text-lg font-semibold text-primary adhoc"
+                                    >
+                                        {{ po.date }}
+                                    </div>
+                                </div>
+
+                                <div class="adhoc" style="margin-left: auto">
+                                    <button
+                                        mat-icon-button
+                                        color="primary"
+                                        (click)="activatingChild(po)"
+                                    >
+                                        <mat-icon>keyboard_arrow_down</mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <ng-container
+                                class="accordion-body"
+                                *ngIf="po.childActive"
+                            >
+                                <div class="example-container">
+                                    <table
+                                        mat-table
+                                        [dataSource]="poItemsTable"
+                                        matSort
+                                        (matSortChange)="
+                                            announceSortChange($event)
+                                        "
+                                    >
+                                        <ng-container
+                                            [matColumnDef]="col.key"
+                                            *ngFor="let col of columnsSchema"
+                                        >
+                                            <th
+                                                mat-header-cell
+                                                mat-sort-header
+                                                *matHeaderCellDef
+                                                [hidden]="!col.isColumnActive"
+                                            >
+                                                <ng-container
+                                                    *ngIf="
+                                                        col.type != 'checkbox'
+                                                    "
+                                                >
+                                                    {{ col.label }}
+                                                </ng-container>
+                                                <ng-container
+                                                    *ngIf="
+                                                        col.type == 'checkbox'
+                                                    "
+                                                >
+                                                    <button
+                                                        type="button"
+                                                        class="font-bold text-red-400"
+                                                        (click)="OnResetPress()"
+                                                    >
+                                                        Reset
+                                                    </button>
+                                                </ng-container>
+                                            </th>
+
+                                            <td
+                                                mat-cell
+                                                *matCellDef="let element"
+                                                [hidden]="!col.isColumnActive"
+                                            >
+                                                <div class="mobile-label">
+                                                    <span
+                                                        >{{ col.label }}:</span
+                                                    >
+                                                </div>
+                                                <div
+                                                    [ngSwitch]="col.type"
+                                                    *ngIf="!element.isEdit"
+                                                >
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'isSelected'
+                                                        "
+                                                    ></div>
+                                                    <div
+                                                        class="btn-edit"
+                                                        *ngSwitchCase="'isEdit'"
+                                                    >
+                                                        <button mat-button>
+                                                            <mat-icon
+                                                                color="primary"
+                                                                >edit</mat-icon
+                                                            >
+                                                        </button>
+                                                    </div>
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'isDelete'
+                                                        "
+                                                        class="btn-edit"
+                                                    >
+                                                        <button
+                                                            mat-icon-button
+                                                            color="primary"
+                                                            (click)="
+                                                                OnDelete(
+                                                                    element,
+                                                                    deleteDialog
+                                                                )
+                                                            "
+                                                        >
+                                                            <mat-icon
+                                                                >delete</mat-icon
+                                                            >
+                                                        </button>
+                                                    </div>
+                                                    <div
+                                                        *ngSwitchDefault
+                                                        style="
+                                                            display: flex;
+                                                            gap: 5px;
+                                                        "
+                                                    >
+                                                        {{ element[col.key] }}
+                                                        <div
+                                                            *ngIf="
+                                                                col.key ==
+                                                                'quantity'
+                                                            "
+                                                        >
+                                                            {{ element.uom }}
+                                                        </div>
+                                                    </div>
+
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'itemname'
+                                                        "
+                                                    >
+                                                        <a
+                                                            class="cursor-pointer"
+                                                            [ngClass]="{
+                                                                'text-green-500':
+                                                                    element.available &&
+                                                                    element.balanceQty ==
+                                                                        0,
+                                                                'text-yellow-400':
+                                                                    element.balanceQty >
+                                                                    0,
+                                                                isAvailable:
+                                                                    element.available
+                                                            }"
+                                                            (click)="
+                                                                OnEditRow(
+                                                                    element
+                                                                )
+                                                            "
+                                                            >{{
+                                                                element[col.key]
+                                                            }}</a
+                                                        >
+                                                    </div>
+
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'ispacked'
+                                                        "
+                                                        class="form-check"
+                                                    >
+                                                        <div
+                                                            *ngIf="
+                                                                element.postatus ==
+                                                                'Packing'
+                                                            "
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                disabled="true"
+                                                                class="form-check-input"
+                                                                [(ngModel)]="
+                                                                    element.ispacked
+                                                                "
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'isreceived'
+                                                        "
+                                                        class="form-check"
+                                                    >
+                                                        <div
+                                                            *ngIf="
+                                                                element.postatus ==
+                                                                'Received'
+                                                            "
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                disabled="true"
+                                                                class="form-check-input"
+                                                                [(ngModel)]="
+                                                                    element.isreceived
+                                                                "
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div
+                                                        *ngSwitchCase="'img'"
+                                                        class="col"
+                                                    >
+                                                        <div class="col">
+                                                            <img
+                                                                [src]="
+                                                                    ingredientsImagePath +
+                                                                    element.prodImage
+                                                                "
+                                                                onerror="this.style.display='none'"
+                                                                class="w-10"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'checkbox'
+                                                        "
+                                                        class="form-check"
+                                                    >
+                                                        <input
+                                                            class="form-check-input"
+                                                            type="checkbox"
+                                                            (change)="
+                                                                OnAvailableChange(
+                                                                    element
+                                                                )
+                                                            "
+                                                            [(ngModel)]="
+                                                                element[col.key]
+                                                            "
+                                                        />
+                                                    </div>
+                                                    <div
+                                                        *ngSwitchCase="'uom'"
+                                                    ></div>
+                                                    <div
+                                                        *ngSwitchCase="'button'"
+                                                    >
+                                                        <button
+                                                            [ngClass]="{
+                                                                'btn btn-primary text-xs':
+                                                                    element.isStockAdded ==
+                                                                    true,
+                                                                'btn btn-secondary text-xs':
+                                                                    element.isStockAdded ==
+                                                                    false
+                                                            }"
+                                                            [disabled]="
+                                                                element.isStockAdded ==
+                                                                true
+                                                            "
+                                                            (click)="
+                                                                OnAddToStock(
+                                                                    element
+                                                                )
+                                                            "
+                                                        >
+                                                            {{
+                                                                element.stockButton
+                                                            }}
+                                                        </button>
+                                                    </div>
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'updateprice'
+                                                        "
+                                                    >
+                                                        <button
+                                                            class="btn btn-secondary"
+                                                            (click)="
+                                                                OnUpdatePrice(
+                                                                    element
+                                                                )
+                                                            "
+                                                        >
+                                                            Update Price
+                                                        </button>
+                                                    </div>
+                                                    <!-- <mat-slide-toggle
+                                                        class="example-margin"
+                                                        color="primary"
+                                                        *ngSwitchCase="'toggle'"
+                                                        [checked]="
+                                                            element.available
+                                                        "
+                                                        [(ngModel)]="
+                                                            element[col.key]
+                                                        "
+                                                        disabled="true"
+                                                    >
+                                                    </mat-slide-toggle> -->
+                                                </div>
+                                                <div
+                                                    [ngSwitch]="col.type"
+                                                    *ngIf="element.isEdit"
+                                                    style="
+                                                        display: flex;
+                                                        gap: 5px;
+                                                    "
+                                                >
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'isSelected'
+                                                        "
+                                                    ></div>
+                                                    <div
+                                                        class="btn-edit"
+                                                        *ngSwitchCase="'isEdit'"
+                                                    >
+                                                        <button
+                                                            mat-button
+                                                            color="primary"
+                                                            (click)="
+                                                                OnAvailableChange(
+                                                                    element
+                                                                )
+                                                            "
+                                                        >
+                                                            <mat-icon
+                                                                color="primary"
+                                                                >check</mat-icon
+                                                            >
+                                                        </button>
+                                                        <button
+                                                            mat-button
+                                                            color="primary"
+                                                            (click)="
+                                                                CancelRow(
+                                                                    element
+                                                                )
+                                                            "
+                                                        >
+                                                            <mat-icon
+                                                                color="warn"
+                                                                >cancel</mat-icon
+                                                            >
+                                                        </button>
+                                                    </div>
+
+                                                    <div *ngSwitchDefault>
+                                                        {{ element[col.key] }}
+                                                    </div>
+                                                    <div
+                                                        *ngSwitchCase="'img'"
+                                                        class="col"
+                                                    >
+                                                        <div class="col">
+                                                            <img
+                                                                [src]="
+                                                                    ingredientsImagePath +
+                                                                    element.prodImage
+                                                                "
+                                                                onerror="this.style.display='none'"
+                                                                class="w-10"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'ispacked'
+                                                        "
+                                                        class="form-check"
+                                                    >
+                                                        <div
+                                                            *ngIf="
+                                                                element.postatus ==
+                                                                'Packing'
+                                                            "
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                disabled="true"
+                                                                class="form-check-input"
+                                                                [(ngModel)]="
+                                                                    element.ispacked
+                                                                "
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'isreceived'
+                                                        "
+                                                        class="form-check"
+                                                    >
+                                                        <div
+                                                            *ngIf="
+                                                                element.postatus ==
+                                                                'Received'
+                                                            "
+                                                        >
+                                                            <input
+                                                                type="checkbox"
+                                                                disabled="true"
+                                                                class="form-check-input"
+                                                                [(ngModel)]="
+                                                                    element.isreceived
+                                                                "
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div
+                                                        *ngSwitchCase="'number'"
+                                                        class="form-group"
+                                                    >
+                                                        <input
+                                                            type="number"
+                                                            [(ngModel)]="
+                                                                element.quantity
+                                                            "
+                                                            class="form-control"
+                                                        />
+                                                    </div>
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'priceperuom'
+                                                        "
+                                                        class="form-group"
+                                                    >
+                                                        <input
+                                                            type="number"
+                                                            [(ngModel)]="
+                                                                element.price
+                                                            "
+                                                            (input)="
+                                                                OnPricePerUOMChange(
+                                                                    $event
+                                                                        .target
+                                                                        .valueAsNumber
+                                                                )
+                                                            "
+                                                            class="form-control"
+                                                        />
+                                                    </div>
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'finalprice'
+                                                        "
+                                                        class="form-group"
+                                                    >
+                                                        <input
+                                                            type="number"
+                                                            [(ngModel)]="
+                                                                element.finalprice
+                                                            "
+                                                            (input)="
+                                                                OnFinalPriceChange(
+                                                                    $event
+                                                                        .target
+                                                                        .valueAsNumber
+                                                                )
+                                                            "
+                                                            class="form-control"
+                                                        />
+                                                    </div>
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'itemname'
+                                                        "
+                                                    >
+                                                        <a
+                                                            class="cursor-pointer"
+                                                            [ngClass]="{
+                                                                'text-green-500':
+                                                                    element.available &&
+                                                                    element.balanceQty ==
+                                                                        0,
+                                                                'text-yellow-400':
+                                                                    element.balanceQty >
+                                                                    0,
+                                                                isAvailable:
+                                                                    element.available
+                                                            }"
+                                                            >{{
+                                                                element[col.key]
+                                                            }}</a
+                                                        >
+                                                    </div>
+
+                                                    <!-- <div
+                                                        *ngIf="
+                                                            col.key ==
+                                                            'quantity'
+                                                        "
+                                                    >
+                                                        {{ element.uom }}
+                                                    </div> -->
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'checkbox'
+                                                        "
+                                                        class="form-check"
+                                                    >
+                                                        <input
+                                                            class="form-check-input"
+                                                            type="checkbox"
+                                                            (change)="
+                                                                OnAvailableChange(
+                                                                    element
+                                                                )
+                                                            "
+                                                            [(ngModel)]="
+                                                                element[col.key]
+                                                            "
+                                                        />
+                                                    </div>
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'updateprice'
+                                                        "
+                                                    >
+                                                        <button
+                                                            class="btn btn-secondary text-xs"
+                                                            (click)="
+                                                                OnUpdatePrice(
+                                                                    element
+                                                                )
+                                                            "
+                                                        >
+                                                            Update Price
+                                                        </button>
+                                                    </div>
+                                                    <div
+                                                        *ngSwitchCase="
+                                                            'isDelete'
+                                                        "
+                                                        class="btn-edit"
+                                                    >
+                                                        <button
+                                                            mat-icon-button
+                                                            color="primary"
+                                                            (click)="
+                                                                OnDelete(
+                                                                    element,
+                                                                    deleteDialog
+                                                                )
+                                                            "
+                                                        >
+                                                            <mat-icon
+                                                                >delete</mat-icon
+                                                            >
+                                                        </button>
+                                                    </div>
+
+                                                    <div
+                                                        *ngSwitchCase="'uom'"
+                                                        class="form-group"
+                                                    >
+                                                        <select
+                                                            class="form-control"
+                                                            [(ngModel)]="
+                                                                element[col.key]
+                                                            "
+                                                        >
+                                                            <option value="">
+                                                                --Select--
+                                                            </option>
+                                                            <option
+                                                                *ngFor="
+                                                                    let uom of uomData
+                                                                "
+                                                                [value]="uom"
+                                                            >
+                                                                {{ uom }}
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                    <div
+                                                        *ngSwitchCase="'button'"
+                                                    >
+                                                        <button
+                                                            [ngClass]="{
+                                                                'btn btn-primary text-xs':
+                                                                    element.isStockAdded ==
+                                                                    true,
+                                                                'btn btn-secondary text-xs':
+                                                                    element.isStockAdded ==
+                                                                    false
+                                                            }"
+                                                            [disabled]="
+                                                                element.isStockAdded ==
+                                                                true
+                                                            "
+                                                            (click)="
+                                                                OnAddToStock(
+                                                                    element
+                                                                )
+                                                            "
+                                                        >
+                                                            {{
+                                                                element.stockButton
+                                                            }}
+                                                        </button>
+                                                    </div>
+                                                    <!-- <mat-slide-toggle
+                                                        class="example-margin"
+                                                        color="primary"
+                                                        *ngSwitchCase="'toggle'"
+                                                        [checked]="
+                                                            element.available
+                                                        "
+                                                        [(ngModel)]="
+                                                            element[col.key]
+                                                        "
+                                                        disabled="false"
+                                                    >
+                                                    </mat-slide-toggle> -->
+                                                </div>
+                                            </td>
+                                        </ng-container>
+                                        <tr
+                                            mat-header-row
+                                            *matHeaderRowDef="displayedColumns"
+                                        ></tr>
+                                        <tr
+                                            mat-row
+                                            *matRowDef="
+                                                let row;
+                                                columns: displayedColumns
+                                            "
+                                            class="hover:bg-blue-200"
+                                        ></tr>
+                                    </table>
+                                </div>
+                                <div class="table-mobile-view">
+                                    <div class="row-data">
+                                        <ng-container
+                                            *ngFor="let row of mobilePoItems"
+                                        >
+                                            <div class="flex flex-row gap-2">
+                                                <div
+                                                    class="col-span-1 pl-2 pr-2"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        class="form-check"
+                                                        (change)="
+                                                            OnAvailableChange(
+                                                                row
+                                                            )
+                                                        "
+                                                        [(ngModel)]="
+                                                            row.available
+                                                        "
+                                                    />
+                                                </div>
+                                                <div
+                                                    class="flex flex-row justify-between w-full"
+                                                >
+                                                    <div class="col-span-1">
+                                                        <a
+                                                            class="cursor-pointer"
+                                                            [ngClass]="{
+                                                                'text-green-500':
+                                                                    row.available &&
+                                                                    row.balanceQty ==
+                                                                        0,
+                                                                'text-yellow-400':
+                                                                    row.balanceQty >
+                                                                    0,
+                                                                isAvailable:
+                                                                    row.available
+                                                            }"
+                                                            (click)="
+                                                                OnEditRow(row)
+                                                            "
+                                                            >{{
+                                                                row.itemName
+                                                            }}</a
+                                                        >
+                                                    </div>
+
+                                                    <div
+                                                        class="col-span-1 pr-2"
+                                                    >
+                                                        <span
+                                                            >{{
+                                                                row.quantity
+                                                            }}/{{
+                                                                row.balanceQty
+                                                            }}</span
+                                                        >
+                                                    </div>
+                                                </div>
+                                            </div>  
+                                        
+                                            <!-- <div
+                                                class="container"
+                                                *ngFor="
+                                                    let col of columnsSchema
+                                                "
+                                            >
+                                                <div class="row">
+                                                    <div
+                                                        class="col-4"
+                                                        *ngIf="
+                                                            col.isColumnActive
+                                                        "
+                                                    >
+                                                        <span
+                                                            class="heading font-bold"
+                                                            >{{
+                                                                col.label
+                                                            }}:</span
+                                                        >
+                                                    </div>
+                                                    <div
+                                                        class="col-6"
+                                                        *ngIf="
+                                                            col.isColumnActive
+                                                        "
+                                                    >
+                                                        <ng-container>
+                                                            <div
+                                                                class="switch-div"
+                                                                [ngSwitch]="
+                                                                    col.type
+                                                                "
+                                                                *ngIf="
+                                                                    !row.isEdit
+                                                                "
+                                                            >
+                                                                <div
+                                                                    *ngSwitchDefault
+                                                                    style="
+                                                                        display: flex;
+                                                                        gap: 5px;
+                                                                    "
+                                                                >
+                                                                    <span>{{
+                                                                        row[
+                                                                            col
+                                                                                .key
+                                                                        ]
+                                                                    }}</span>
+                                                                    <div
+                                                                        *ngIf="
+                                                                            col.key ==
+                                                                            'quantity'
+                                                                        "
+                                                                    >
+                                                                        {{
+                                                                            row.uom
+                                                                        }}
+                                                                    </div>
+
+                                                                </div>
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'itemname'
+                                                                    "
+                                                                >
+                                                                    <a
+                                                                        (click)="
+                                                                            OnEditRow(
+                                                                                row
+                                                                            )
+                                                                        "
+                                                                        [ngClass]="{
+                                                                            isAvailable:
+                                                                                row.available
+                                                                        }"
+                                                                        class="cursor-pointer"
+                                                                        >{{
+                                                                            row[
+                                                                                col
+                                                                                    .key
+                                                                            ]
+                                                                        }}</a
+                                                                    >
+                                                                </div>
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'ispacked'
+                                                                    "
+                                                                    class="form-check"
+                                                                >
+                                                                    <div
+                                                                        *ngIf="
+                                                                            row.postatus ==
+                                                                            'Packing'
+                                                                        "
+                                                                    >
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            disabled="true"
+                                                                            class="form-check-input"
+                                                                            [(ngModel)]="
+                                                                                row.ispacked
+                                                                            "
+                                                                        />
+                                                                    </div>
+                                                                </div>
+
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'isreceived'
+                                                                    "
+                                                                    class="form-check"
+                                                                >
+                                                                    <div
+                                                                        *ngIf="
+                                                                            row.postatus ==
+                                                                            'Received'
+                                                                        "
+                                                                    >
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            disabled="true"
+                                                                            class="form-check-input"
+                                                                            [(ngModel)]="
+                                                                                row.isreceived
+                                                                            "
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'img'
+                                                                    "
+                                                                    class="col"
+                                                                >
+                                                                    <div
+                                                                        class="col"
+                                                                    >
+                                                                        <img
+                                                                            [src]="
+                                                                                ingredientsImagePath +
+                                                                                row.prodImage
+                                                                            "
+                                                                            onerror="this.style.display='none'"
+                                                                            class="w-10"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'updateprice'
+                                                                    "
+                                                                >
+                                                                    <button
+                                                                        class="btn btn-secondary text-xs"
+                                                                        (click)="
+                                                                            OnUpdatePrice(
+                                                                                row
+                                                                            )
+                                                                        "
+                                                                    >
+                                                                        Update
+                                                                        Price
+                                                                    </button>
+                                                                </div>
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'checkbox'
+                                                                    "
+                                                                    class="form-check"
+                                                                >
+                                                                    <input
+                                                                        class="form-check-input"
+                                                                        type="checkbox"
+                                                                        (change)="
+                                                                            OnAvailableChange(
+                                                                                row
+                                                                            )
+                                                                        "
+                                                                        [(ngModel)]="
+                                                                            row[
+                                                                                col
+                                                                                    .key
+                                                                            ]
+                                                                        "
+                                                                    />
+                                                                </div>
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'button'
+                                                                    "
+                                                                >
+                                                                    <button
+                                                                        [ngClass]="{
+                                                                            'btn btn-primary text-xs':
+                                                                                row.isStockAdded ==
+                                                                                true,
+                                                                            'btn btn-secondary text-xs':
+                                                                                row.isStockAdded ==
+                                                                                false
+                                                                        }"
+                                                                        [disabled]="
+                                                                            row.isStockAdded ==
+                                                                            true
+                                                                        "
+                                                                        (click)="
+                                                                            OnAddToStock(
+                                                                                row
+                                                                            )
+                                                                        "
+                                                                    >
+                                                                        {{
+                                                                            row.stockButton
+                                                                        }}
+                                                                    </button>
+                                                                </div>
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'uom'
+                                                                    "
+                                                                ></div>
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'isEdit'
+                                                                    "
+                                                                >
+                                                                    <button
+                                                                        mat-button
+                                                                        (click)="
+                                                                            OnEditRow(
+                                                                                row
+                                                                            )
+                                                                        "
+                                                                    >
+                                                                        <mat-icon
+                                                                            color="primary"
+                                                                            >edit</mat-icon
+                                                                        >
+                                                                    </button>
+                                                                </div>
+
+                                                            </div>
+                                                            <div
+                                                                class="switch-div"
+                                                                [ngSwitch]="
+                                                                    col.type
+                                                                "
+                                                                *ngIf="
+                                                                    row.isEdit
+                                                                "
+                                                            >
+                                                                <div
+                                                                    *ngSwitchDefault
+                                                                >
+                                                                    {{
+                                                                        row[
+                                                                            col
+                                                                                .key
+                                                                        ]
+                                                                    }}
+                                                                </div>
+
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'number'
+                                                                    "
+                                                                    style="
+                                                                        width: auto;
+                                                                        display: flex;
+                                                                        gap: 5px;
+                                                                    "
+                                                                >
+                                                                    <input
+                                                                        type="number"
+                                                                        class="form-control"
+                                                                        [(ngModel)]="
+                                                                            row.quantity
+                                                                        "
+                                                                        style="
+                                                                            width: 50%;
+                                                                        "
+                                                                    />
+                                                                </div>
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'updateprice'
+                                                                    "
+                                                                >
+                                                                    <button
+                                                                        class="btn btn-secondary text-xs"
+                                                                        (click)="
+                                                                            OnUpdatePrice(
+                                                                                row
+                                                                            )
+                                                                        "
+                                                                    >
+                                                                        Update
+                                                                        Price
+                                                                    </button>
+                                                                </div>
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'priceperuom'
+                                                                    "
+                                                                    style="
+                                                                        width: auto;
+                                                                        display: flex;
+                                                                        gap: 5px;
+                                                                    "
+                                                                >
+                                                                    <input
+                                                                        type="number"
+                                                                        class="form-control"
+                                                                        [(ngModel)]="
+                                                                            row.price
+                                                                        "
+                                                                        (input)="
+                                                                            OnPricePerUOMChange(
+                                                                                $event
+                                                                                    .target
+                                                                                    .valueAsNumber
+                                                                            )
+                                                                        "
+                                                                        style="
+                                                                            width: 50%;
+                                                                        "
+                                                                    />
+                                                                </div>
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'img'
+                                                                    "
+                                                                    class="col"
+                                                                >
+                                                                    <div
+                                                                        class="col"
+                                                                    >
+                                                                        <img
+                                                                            [src]="
+                                                                                ingredientsImagePath +
+                                                                                row.prodImage
+                                                                            "
+                                                                            onerror="this.style.display='none'"
+                                                                            class="w-10"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'finalprice'
+                                                                    "
+                                                                    style="
+                                                                        width: auto;
+                                                                        display: flex;
+                                                                        gap: 5px;
+                                                                    "
+                                                                >
+                                                                    <input
+                                                                        type="number"
+                                                                        class="form-control"
+                                                                        [(ngModel)]="
+                                                                            row.finalprice
+                                                                        "
+                                                                        (input)="
+                                                                            OnFinalPriceChange(
+                                                                                $event
+                                                                                    .target
+                                                                                    .valueAsNumber
+                                                                            )
+                                                                        "
+                                                                        style="
+                                                                            width: 50%;
+                                                                        "
+                                                                    />
+                                                                </div>
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'button'
+                                                                    "
+                                                                >
+                                                                    <button
+                                                                        [ngClass]="{
+                                                                            'btn btn-primary text-xs':
+                                                                                row.isStockAdded ==
+                                                                                true,
+                                                                            'btn btn-secondary text-xs':
+                                                                                row.isStockAdded ==
+                                                                                false
+                                                                        }"
+                                                                        [disabled]="
+                                                                            row.isStockAdded ==
+                                                                            true
+                                                                        "
+                                                                        (click)="
+                                                                            OnAddToStock(
+                                                                                row
+                                                                            )
+                                                                        "
+                                                                    >
+                                                                        {{
+                                                                            row.stockButton
+                                                                        }}
+                                                                    </button>
+                                                                </div>
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'itemname'
+                                                                    "
+                                                                    [ngClass]="{
+                                                                        isAvailable:
+                                                                            row.available
+                                                                    }"
+                                                                >
+                                                                    <a
+                                                                        class="cursor-pointer"
+                                                                        (click)="
+                                                                            OnEditRow(
+                                                                                row
+                                                                            )
+                                                                        "
+                                                                    >
+                                                                        {{
+                                                                            row[
+                                                                                col
+                                                                                    .key
+                                                                            ]
+                                                                        }}
+                                                                    </a>
+                                                                </div>
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'checkbox'
+                                                                    "
+                                                                    class="form-check"
+                                                                >
+                                                                    <input
+                                                                        class="form-check-input"
+                                                                        type="checkbox"
+                                                                        (change)="
+                                                                            OnAvailableChange(
+                                                                                row
+                                                                            )
+                                                                        "
+                                                                        [(ngModel)]="
+                                                                            row[
+                                                                                col
+                                                                                    .key
+                                                                            ]
+                                                                        "
+                                                                    />
+                                                                </div>
+
+                                                                <div
+                                                                    *ngSwitchCase="
+                                                                        'uom'
+                                                                    "
+                                                                    class="form-group"
+                                                                >
+                                                                    <select
+                                                                        class="form-control"
+                                                                        [(ngModel)]="
+                                                                            row[
+                                                                                col
+                                                                                    .key
+                                                                            ]
+                                                                        "
+                                                                    >
+                                                                        <option
+                                                                            value=""
+                                                                        >
+                                                                            --Select--
+                                                                        </option>
+                                                                        <option
+                                                                            *ngFor="
+                                                                                let uom of uomData
+                                                                            "
+                                                                            [value]="
+                                                                                uom
+                                                                            "
+                                                                        >
+                                                                            {{
+                                                                                uom
+                                                                            }}
+                                                                        </option>
+                                                                    </select>
+                                                                </div>
+                                                                <div
+                                                                    class="btn-edit"
+                                                                    *ngSwitchCase="
+                                                                        'isEdit'
+                                                                    "
+                                                                >
+                                                                    <button
+                                                                        mat-button
+                                                                        color="primary"
+                                                                        (click)="
+                                                                            OnAvailableChange(
+                                                                                row
+                                                                            )
+                                                                        "
+                                                                    >
+                                                                        <mat-icon
+                                                                            color="primary"
+                                                                            >check</mat-icon
+                                                                        >
+                                                                    </button>
+                                                                    <button
+                                                                        mat-button
+                                                                        color="primary"
+                                                                        (click)="
+                                                                            CancelRow(
+                                                                                row
+                                                                            )
+                                                                        "
+                                                                    >
+                                                                        <mat-icon
+                                                                            color="warn"
+                                                                            >cancel</mat-icon
+                                                                        >
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </ng-container>
+                                                    </div>
+                                                </div>
+                                            </div> -->
+                                            <hr />
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+                
+                    <!-- <ng-container *ngIf="todayCompletedTasks.length > 0">
+                        <div
+                            class="completed-heading"
+                            (click)="toggleCompletedTasks()"
+                        >
+                            <span>Today Completed Tasks</span>
+
+                            <div class="down-arrow">
+                                <button mat-icon-button>
+                                    <mat-icon (click)="toggleCompletedTasks()"
+                                        >keyboard_arrow_down</mat-icon
+                                    >
+                                </button>
+                            </div>
+                        </div>
+                        <div *ngIf="isCompletedTasksVisible">
+                            <div
+                                *ngFor="let task of todayCompletedTasks"
+                                class="cont-completed"
+                            >
+                                <div class="completed-task-name">
+                                    {{ task.taskname }}
+                                </div>
+
+                                <div
+                                    class="assd-to"
+                                    *ngIf="user.role == 'admin'"
+                                >
+                                    {{ task.assignedto }}
+                                </div>
+                                <div class="duration-date">
+                                    <div class="duration">
+                                        {{ task.duration }} min
+                                    </div>
+                                    <div
+                                        class="date text-sm whitespace-nowrap text-secondary"
+                                    >
+                                        {{ task.duedate | date: "LLL dd" }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container> -->
+                </div>
+            </div>
+        </mat-drawer-content>
+    </mat-drawer-container>
+</section>
+
+<ng-template #content let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title f-w-600" id="exampleModalLabel">Choose</h5>
+        <button
+            type="button"
+            class="close"
+            aria-label="Close"
+            (click)="OnClose('Cross Click')"
+        >
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <div class="form-group">
+            <form class="needs-validation">
+                <div class="form">
+                    <div class="form-group">
+                        <label class="mb-1">Purchase Order:</label>
+                        <select
+                            class="form-control"
+                            [formControl]="purchaseorder"
+                        >
+                            <option value="">--Select--</option>
+                            <option
+                                *ngFor="let adhoc of adhocPoData"
+                                [value]="adhoc.adhocpoid"
+                            >
+                                {{ adhoc.adhocpoid }}-{{ adhoc.description }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="mb-1">Categories:</label>
+                        <select class="form-control" [formControl]="category">
+                            <option value="All">All</option>
+                            <option
+                                [value]="val"
+                                *ngFor="let val of categories"
+                            >
+                                {{ val }}
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="validationCustom01" class="mb-1"
+                            >Available:</label
+                        >
+                        <select class="form-control" [formControl]="available">
+                            <option value="All">All</option>
+                            <option value="true">Yes</option>
+                            <option value="false">No</option>
+                        </select>
+                        <!-- <div *ngIf="validation">
+                    <mat-error *ngIf="TableFieldsForm.controls['prodname'].hasError('required')">
+                      <strong >required</strong>
+                    </mat-error>
+                  </div> -->
+                  
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="onSavePopup()">
+            Save
+        </button>
+        <button
+            class="btn btn-secondary"
+            type="button"
+            data-dismiss="modal"
+            (click)="OnClose('Cross Click')"
+        >
+            Close
+        </button>
+    </div>
+</ng-template>
+<!-- delete dialog from below -->
+<ng-template #deleteDialog>
+    <div mat-dialog-title class="dialog-title flex flex-row justify-between">
+        <h4>Delete Record</h4>
+        <button
+            mat-icon-button
+            aria-label="close dialog"
+            (click)="CloseDialog()"
+        >
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <mat-dialog-content class="mat-typography text-center">
+        <p>Do you really want to delete this record?</p>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+        <button mat-raised-button color="primary" (click)="confirm()">
+            Yes
+        </button>
+        <button mat-raised-button color="secondary" (click)="decline()">
+            No
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+<ng-template #deleteDialogAdhoc>
+    <div mat-dialog-title class="dialog-title flex flex-row justify-between">
+        <h4>Delete Record</h4>
+        <button
+            mat-icon-button
+            aria-label="close dialog"
+            (click)="CloseDialog()"
+        >
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <mat-dialog-content class="mat-typography text-center">
+        <p>Do you really want to delete this record?</p>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+        <button mat-raised-button color="primary" (click)="OnConfirmAdhoc()">
+            Yes
+        </button>
+        <button mat-raised-button color="secondary" (click)="decline()">
+            No
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+<ng-template #updatePrice>
+    <div mat-dialog-title class="dialog-title flex flex-row justify-between">
+        <h4>Update Price</h4>
+        <button
+            mat-icon-button
+            aria-label="close dialog"
+            (click)="CloseDialog()"
+        >
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <mat-dialog-content class="mat-typography text-center">
+        <div class="form">
+            <div class="form-group">
+                <label for="" class="mb-1">Sale Price</label>
+                <input
+                    type="number"
+                    class="form-control"
+                    [formControl]="salePriceControl"
+                />
+            </div>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+        <button mat-raised-button color="primary" (click)="Cancel()">
+            Cancel
+        </button>
+        <button mat-raised-button color="secondary" (click)="OnUpdatePrice()">
+            Save
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+
+<ng-template #mergePopup>
+    <div mat-dialog-title class="dialog-title flex flex-row justify-between">
+        <h4>Merge PO</h4>
+        <button
+            mat-icon-button
+            aria-label="close dialog"
+            (click)="CloseDialog()"
+        >
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <mat-dialog-content
+        class="mat-typography text-center"
+        style="height: 20rem"
+    >
+        <div class="form">
+            <div class="form-group">
+                <label for="" class="mb-1">New PO Description:</label>
+                <input
+                    type="text"
+                    class="form-control"
+                    [formControl]="newPoName"
+                />
+            </div>
+            <div class="form-group h-full">
+                <ng-multiselect-dropdown
+                    [placeholder]="'POs'"
+                    [settings]="dropdownSettings"
+                    [data]="adhocPoData"
+                    [formControl]="posList"
+                    class="form-control-plaintext"
+                >
+                </ng-multiselect-dropdown>
+            </div>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+        <button mat-raised-button color="primary" (click)="Cancel()">
+            Cancel
+        </button>
+        <button mat-raised-button color="secondary" (click)="CreateMergePO()">
+            Save
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+
+<ng-template #snackBar>
+    <div class="flex mt-auto">
+        <span class="example-pizza-party" matSnackBarLabel>
+            {{ responseMessage }}
+        </span>
+        <span matSnackBarActions class="ml-auto">
+            <button
+                mat-button
+                matSnackBarAction
+                (click)="snackBarRef.dismissWithAction()"
+            >
+                <mat-icon color="primary">close</mat-icon>
+            </button>
+        </span>
+    </div>
+</ng-template>
